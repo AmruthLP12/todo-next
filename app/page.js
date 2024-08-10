@@ -15,9 +15,16 @@ export default function Home() {
     console.log(formData);
   };
 
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+  };
+
   return (
     <>
-      <form className="flex items-start flex-col gap-2 w-[80%] max-w-[600px] mt-24 px-2 mx-auto">
+      <form
+        onSubmit={onSubmitHandler}
+        className="flex items-start flex-col gap-2 w-[80%] max-w-[600px] mt-24 px-2 mx-auto"
+      >
         <input
           value={formData.title}
           onChange={onChangeHandler}
