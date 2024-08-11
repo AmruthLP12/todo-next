@@ -1,7 +1,7 @@
 "use client";
 import Todo from "@/Components/Todo";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,6 +10,49 @@ export default function Home() {
     title: "",
     description: "",
   });
+
+  const [todoData, setTodoData] = useState([]);
+
+  const fetchTodos = async () => {
+    const response = await axios("/api");
+    setTodoData(response.data.todos);
+  };
+
+  const deleteTodo = async (mongoId) => {
+    const response = await axios.delete("/api", {
+      params: {
+        mongoId: mongoId,
+      },
+    });
+    toast.error(response.data.msg);
+    fetchTodos();
+  };
+
+  const completeTodo = async (id) => {
+    const response = await axios.put("/api", {},{
+      params:{
+        mongoId: id,
+      }
+    })
+    toast.info(response.data.msg);
+    fetchTodos();
+  } 
+
+  const markAsPending = async (id) => {
+    const response = await axios.put("/api", {}, {
+      params: {
+        mongoId: id,
+        action: "pending",
+      }
+    });
+    toast.warning(response.data.msg);
+    fetchTodos();
+  };
+  
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
 
   const onChangeHandler = (e) => {
     const name = e.target.name;
@@ -22,16 +65,18 @@ export default function Home() {
     e.preventDefault();
     try {
       // api code
-      const response = await axios.post('/api',formData)
-      toast.success(response.data.msg)
+      const response = await axios.post("/api", formData);
+      toast.success(response.data.msg);
+      setFormData({ title: "", description: "" });
+      fetchTodos();
     } catch (error) {
-      toast.error("Error")
+      toast.error("Error");
     }
   };
 
   return (
     <>
-    <ToastContainer theme="dark"/>
+      <ToastContainer theme="dark" />
       <form
         onSubmit={onSubmitHandler}
         className="flex items-start flex-col gap-2 w-[80%] max-w-[600px] mt-24 px-2 mx-auto"
@@ -43,6 +88,7 @@ export default function Home() {
           name="title"
           placeholder="Enter Title"
           className="px-3 py-2 border-2 w-full rounded bg-gray-800 text-white"
+          required
         />
         <textarea
           value={formData.description}
@@ -50,6 +96,7 @@ export default function Home() {
           onChange={onChangeHandler}
           placeholder="Enter Description"
           className="px-3 py-2 border-2 w-full rounded bg-gray-800 text-white"
+          required
         ></textarea>
         <button
           type="submit"
@@ -81,9 +128,21 @@ export default function Home() {
             </tr>
           </thead>
           <tbody>
-            <Todo />
-            <Todo />
-            <Todo />
+            {todoData.map((item, index) => {
+              return (
+                <Todo
+                  key={index}
+                  id={index}
+                  title={item.title}
+                  description={item.description}
+                  complete={item.isCompleted}
+                  mongoId={item._id}
+                  deleteTodo={deleteTodo}
+                  completeTodo={completeTodo}
+                  markAsPending={markAsPending}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
