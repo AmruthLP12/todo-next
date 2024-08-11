@@ -1,5 +1,6 @@
 "use client";
 import Todo from "@/Components/Todo";
+import axios from "axios";
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -21,8 +22,8 @@ export default function Home() {
     e.preventDefault();
     try {
       // api code
-
-      toast.success("Success")
+      const response = await axios.post('/api',formData)
+      toast.success(response.data.msg)
     } catch (error) {
       toast.error("Error")
     }
@@ -41,14 +42,14 @@ export default function Home() {
           type="text"
           name="title"
           placeholder="Enter Title"
-          className="px-3 py-2 border-2 w-full rounded bg-gray-800 "
+          className="px-3 py-2 border-2 w-full rounded bg-gray-800 text-white"
         />
         <textarea
           value={formData.description}
           name="description"
           onChange={onChangeHandler}
           placeholder="Enter Description"
-          className="px-3 py-2 border-2 w-full rounded bg-gray-800"
+          className="px-3 py-2 border-2 w-full rounded bg-gray-800 text-white"
         ></textarea>
         <button
           type="submit"
